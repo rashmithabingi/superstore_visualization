@@ -1,0 +1,80 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import numpy as np
+
+sns.set_style("whitegrid")
+
+np.random.seed(42)
+df = pd.DataFrame({
+    'Order Date': pd.date_range('2020-01-01', periods=500, freq='D'),
+    'Sales': np.random.randint(100, 5000, 500),
+    'Profit': np.random.randint(-500, 2000, 500),
+    'Category': np.random.choice(['Furniture','Office Supplies','Technology'], 500),
+    'Region': np.random.choice(['East','West','Central','South'], 500),
+    'Discount': np.random.uniform(0, 0.5, 500),
+    'Product Name': np.random.choice(['Stapler','Desk','Laptop','Phone','Chair','Printer'], 500)
+})
+df['Year'] = df['Order Date'].dt.year
+df['Month'] = df['Order Date'].dt.month
+
+print("Dataset ready!")
+print(df.head())
+
+plt.figure(figsize=(8,5))
+category_sales = df.groupby('Category')['Sales'].sum().reset_index()
+sns.barplot(x='Category', y='Sales', data=category_sales, palette='Set2')
+plt.title('Total Sales by Category', fontsize=14)
+plt.tight_layout()
+plt.savefig('plot1_sales_category.png')
+plt.show()
+
+plt.figure(figsize=(8,5))
+region_sales = df.groupby('Region')['Sales'].sum().reset_index()
+sns.barplot(x='Region', y='Sales', data=region_sales, palette='Set1')
+plt.title('Total Sales by Region', fontsize=14)
+plt.tight_layout()
+plt.savefig('plot2_sales_region.png')
+plt.show()
+
+plt.figure(figsize=(8,5))
+category_profit = df.groupby('Category')['Profit'].sum().reset_index()
+colors = ['green' if x > 0 else 'red' for x in category_profit['Profit']]
+plt.bar(category_profit['Category'], category_profit['Profit'], color=colors)
+plt.title('Total Profit by Category', fontsize=14)
+plt.tight_layout()
+plt.savefig('plot3_profit_category.png')
+plt.show()
+
+plt.figure(figsize=(10,6))
+top_products = df.groupby('Product Name')['Sales'].sum().reset_index()
+sns.barplot(x='Sales', y='Product Name', data=top_products, palette='Blues_r')
+plt.title('Top Products by Sales', fontsize=14)
+plt.tight_layout()
+plt.savefig('plot4_top_products.png')
+plt.show()
+plt.figure(figsize=(12,5))
+monthly_sales = df.groupby(['Year','Month'])['Sales'].sum().reset_index()
+monthly_sales['Date'] = pd.to_datetime(monthly_sales[['Year','Month']].assign(Day=1))
+plt.plot(monthly_sales['Date'], monthly_sales['Sales'], color='steelblue', linewidth=2)
+plt.title('Monthly Sales Trend', fontsize=14)
+plt.tight_layout()
+plt.savefig('plot5_monthly_trend.png')
+plt.show()
+
+plt.figure(figsize=(8,5))
+sns.scatterplot(x='Discount', y='Profit', data=df, alpha=0.5, color='purple')
+plt.title('Discount vs Profit', fontsize=14)
+plt.tight_layout()
+plt.savefig('plot6_discount_profit.png')
+plt.show()
+
+plt.figure(figsize=(10,6))
+pivot = df.pivot_table(values='Sales', index='Category', columns='Month', aggfunc='sum')
+sns.heatmap(pivot, annot=True, fmt='.0f', cmap='YlOrRd')
+plt.title('Sales Heatmap - Category vs Month', fontsize=14)
+plt.tight_layout()
+plt.savefig('plot7_heatmap.png')
+plt.show()
+
+print("\n All 7 visualizations saved successfully!")
